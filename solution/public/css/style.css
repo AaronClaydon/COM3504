@@ -1,0 +1,12 @@
+body {
+    padding-top: 70px;
+}
+
+.search-form .search-query-form .query-field  {
+    width: 43%;
+    display: inline;
+}
+.search-form .search-query-form .btn  {
+    width: 10%;
+    display: inline;
+}

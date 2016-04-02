@@ -1,0 +1,76 @@
+<form class="form-horizontal search-form">
+    <div class="form-group">
+        <label for="input-search-type" class="col-sm-2 control-label">Search Type</label>
+        <div class="col-sm-10">
+            <select class="form-control" ng-model="query.type">
+                <option value="AND">And</option>
+                <option value="OR">Or</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputPassword3" class="col-sm-2 control-label">Query</label>
+        <div class="col-sm-10">
+            <div class="search-query-form" ng-repeat="(key, term) in query.terms">
+                <select class="form-control query-field" ng-model="term.type">
+                    <option value="AUTHOR">Author</option>
+                    <option value="MENTION">Mention</option>
+                    <option value="TAG">Hashtag</option>
+                    <option value="TEXT">Text</option>
+                </select>
+
+                <span ng-switch="term.type">
+                    <span ng-switch-when="AUTHOR">
+                        @
+                    </span>
+                    <span ng-switch-when="MENTION">
+                        @
+                    </span>
+                    <span ng-switch-when="TAG">
+                        #
+                    </span>
+                </span>
+
+                <input type="text" class="form-control query-field" ng-model="term.value" placeholder="Value"/>
+
+                <button class="btn btn-danger" ng-click="deleteTerm(key)">Delete</button>
+            </div>
+
+            <button class="btn btn-primary" ng-click="addTerm()">Add new term</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" ng-model="query.databaseOnly"> Search only Database
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-default" ng-click="search()">Search</button>
+        </div>
+    </div>
+</form>
+
+<div class="search-results">
+    <div class="media left" ng-repeat="tweet in results.tweets">
+        <div class="media-left">
+            <a href="#">
+                <img class="media-object" ng-src="{{tweet.user.profile_image_url}}">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading">
+                {{ tweet.user.name }}
+                    <small>
+                        @{{ tweet.user.screen_name }}
+                        {{ tweet.created_at }}
+                    </small>
+            </h4>
+            {{ tweet.text }}
+        </div>
+    </div>
+</div>

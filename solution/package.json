@@ -1,0 +1,12 @@
+{
+  "name": "COM3504-Assignment",
+  "version": "0.0.1",
+  "description": "Social web interface for assignment COM3504",
+  "author": "Aaron Claydon & Kranti Nebhwani",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "twit": "^2.2.3"
+  },
+  "private": true
+}
