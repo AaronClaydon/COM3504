@@ -17,6 +17,11 @@ app.config(['$routeProvider', function($routeProvider) {
 var appControllers = angular.module('footballControllers', []);
 
 appControllers.controller('SearchFormController', ['$scope', '$http', function ($scope, $http) {
+    $('#search-tabs a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+
     $scope.query = {
         type: 'OR',
         databaseOnly: false,

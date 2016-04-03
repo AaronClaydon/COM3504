@@ -55,22 +55,91 @@
     </div>
 </form>
 
-<div class="search-results">
-    <div class="media left" ng-repeat="tweet in results.tweets">
-        <div class="media-left">
-            <a href="#">
-                <img class="media-object" ng-src="{{tweet.user.profile_image_url}}">
-            </a>
+<div class="search-results" ng-class="{show: results}">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist" id="search-tabs">
+        <li role="presentation" class="active"><a href="#tweets" aria-controls="tweets" role="tab" data-toggle="tab">Tweets</a></li>
+        <li role="presentation"><a href="#word-frequency" aria-controls="word-frequency" role="tab" data-toggle="tab">Word Frequency</a></li>
+        <li role="presentation"><a href="#user-frequency" aria-controls="user-frequency" role="tab" data-toggle="tab">Active Users</a></li>
+        <li role="presentation"><a href="#locations" aria-controls="locations" role="tab" data-toggle="tab">Locations</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="tweets">
+            <div class="media left" ng-repeat="tweet in results.tweets">
+                <div class="media-left">
+                    <a href="#">
+                        <img class="media-object" ng-src="{{tweet.user.profile_image_url}}">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">
+                        {{ tweet.user.name }}
+                        <small>
+                            @{{ tweet.user.screen_name }}
+                            {{ tweet.created_at }}
+
+                            <span ng-if="tweet.retweeted_status">
+                                 | Retweet of @{{ tweet.retweeted_status.user.screen_name }}
+                            </span>
+
+                            <span class="pull-right">
+                                <a href="https://twitter.com/{{ tweet.user.screen_name }}/status/{{ tweet.id_str }}" target="_blank">Link</a>
+                            </span>
+                        </small>
+                    </h4>
+                    {{ tweet.text }}
+                </div>
+            </div>
         </div>
-        <div class="media-body">
-            <h4 class="media-heading">
-                {{ tweet.user.name }}
-                    <small>
-                        @{{ tweet.user.screen_name }}
-                        {{ tweet.created_at }}
-                    </small>
-            </h4>
-            {{ tweet.text }}
+
+        <div role="tabpanel" class="tab-pane" id="word-frequency">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Word</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr ng-repeat="(key, word) in results.frequency.words">
+                        <th scope="row">{{key + 1}}</th>
+                        <td>{{word.word}}</td>
+                        <td>{{word.count}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="user-frequency">
+            <div class="media left" ng-repeat="person in results.frequency.people">
+                <div class="media-left">
+                    <a href="#">
+                        <img class="media-object" ng-src="{{person.user.profile_image_url}}">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">
+                        {{ person.user.name }}
+                        <small>
+                            @{{ person.user.screen_name }}
+                        </small>
+                    </h4>
+
+                    {{ person.count }} tweets <br/>
+                    Frequent words:
+                    <span ng-repeat="word in person.words">
+                        {{ word.word }}({{ word.count }})<span ng-if="!$last">, </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="locations">
+            locations
         </div>
     </div>
 </div>

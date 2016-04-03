@@ -54,6 +54,90 @@ app.post('/performsearch', function(req, res) {
 
     twitterClient.get('search/tweets', { q: twitterQuery, count: 100 }, function(err, data, response) {
         responseData.tweets = data.statuses;
+        responseData.frequency = {
+            words: [],
+            people: []
+        };
+
+        //Extract frequency of words and people
+        frequencyWordList = {};
+        frequencyPeopleList = {};
+        for (var i_tweet = 0; i_tweet < data.statuses.length; i_tweet++) {
+            tweet = data.statuses[i_tweet];
+
+            //count number of tweets this user has had in the data set
+            if(frequencyPeopleList[tweet.user.id_str] === undefined) {
+                frequencyPeopleList[tweet.user.id_str] = {
+                    user: tweet.user,
+                    count: 0,
+                    words: {}
+                };
+            }
+            frequencyPeopleList[tweet.user.id_str].count += 1;
+
+            //split the tweet text to get an array of words
+            textSplit = tweet.text.split(' ');
+
+            //iterate through all the words to count them
+            for (var i_word = 0; i_word < textSplit.length; i_word++) {
+                //make it lowercase so different cases are seen as the same
+                word = textSplit[i_word].toLowerCase();
+
+                //ignore the retweet text
+                if(!(word === 'rt')) {
+                    //if the word hasnt been seen before add it to the dictionary
+                    if(frequencyWordList[word] === undefined) {
+                        frequencyWordList[word] = 0;
+                    }
+                    //if the word hasnt been seen for this suer before add it to the dictionary
+                    if(frequencyPeopleList[tweet.user.id_str].words[word] === undefined) {
+                        frequencyPeopleList[tweet.user.id_str].words[word] = 0;
+                    }
+
+                    frequencyWordList[word] += 1;
+                    frequencyPeopleList[tweet.user.id_str].words[word] += 1;
+                }
+            }
+        }
+
+        //Format and order the word frequency
+        for (var word in frequencyWordList) {
+            responseData.frequency.words.push({
+                word: word,
+                count: frequencyWordList[word]
+            });
+        }
+        responseData.frequency.words.sort(function(a, b){
+            return b.count - a.count;
+        });
+        responseData.frequency.words = responseData.frequency.words.slice(0, 20);
+
+        //Format and order the user frequency
+        for (var userID in frequencyPeopleList) {
+            var userWordList = [];
+            //Format the order the user's word frequency
+            for (var word in frequencyPeopleList[userID].words) {
+                userWordList.push({
+                    word: word,
+                    count: frequencyPeopleList[userID].words[word]
+                });
+            }
+            userWordList.sort(function(a, b){
+                return b.count - a.count;
+            });
+            userWordList = userWordList.slice(0, 10);
+
+            //Add the user object
+            responseData.frequency.people.push({
+                user: frequencyPeopleList[userID].user,
+                count: frequencyPeopleList[userID].count,
+                words: userWordList
+            });
+        }
+        responseData.frequency.people.sort(function(a, b){
+            return b.count - a.count;
+        });
+        responseData.frequency.people = responseData.frequency.people.slice(0, 10);
 
         res.end(JSON.stringify(responseData));
     });

@@ -10,3 +10,10 @@ body {
     width: 10%;
     display: inline;
 }
+
+.search-results {
+    visibility: hidden;
+}
+.search-results.show {
+    visibility: visible;
+}
