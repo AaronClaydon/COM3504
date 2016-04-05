@@ -17,3 +17,7 @@ body {
 .search-results.show {
     visibility: visible;
 }
+
+#tweet-map {
+    height: 500px;
+}
