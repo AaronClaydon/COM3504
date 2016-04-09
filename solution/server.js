@@ -2,12 +2,20 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var twit = require('twit');
+var mysql      = require('mysql');
 var twitterClient = new twit({
     consumer_key: '8hoGnVhZ2ZNckjqBrgkmmLn7l',
     consumer_secret: 'H5IYUyUvTie4F2lqYwKwpwXYa272Dn5ODbxRDagdEEKlDiu92X',
     access_token: '95486057-b1XbCHo8lZtxxB13hmi6bSif7h1iLPV2bMmuqfWCk',
     access_token_secret: 'Loc3WXMGn52TKcGcEhtPX1J4JQLcBbCf5MtaaHjZQ0Co4'
 });
+var connection = mysql.createConnection({
+    host: 'azzy.network',
+    user: 'com3504',
+    password: 'password',
+    database: 'com3504'
+});
+connection.connect();
 var app = express();
 
 app.use(bodyParser.json());
@@ -22,7 +30,6 @@ app.get('/', function (req, res) {
 
 app.post('/performsearch', function(req, res) {
     var query = req.body;
-    var responseData = {};
 
     //Build the twitter query
     var twitterQuery = "";
@@ -52,8 +59,78 @@ app.post('/performsearch', function(req, res) {
         }
     }
 
-    twitterClient.get('search/tweets', { q: twitterQuery, count: 100 }, function(err, data, response) {
-        responseData.tweets = data.statuses;
+    //Check if this query is in the cache
+    connection.query('SELECT query, since_id FROM queries WHERE query=?', [twitterQuery.toLowerCase()], function(err, rows, fields) {
+        if (err) throw err;
+
+        if(rows.length === 1) {
+            //Existing query results
+            var since_id = rows[0].since_id;
+
+            //Get all the cached tweets for this query
+            connection.query('SELECT tweet FROM query_tweets WHERE query=?', [twitterQuery.toLowerCase()], function(err, rows, fields) {
+                var dbTweets = [];
+
+                for (var i = 0; i < rows.length; i++) {
+                    row = rows[i];
+
+                    dbTweets.push(JSON.parse(row.tweet));
+                }
+
+                //Search twitter for tweets after this point
+                twitterSearch(dbTweets, since_id);
+            });
+        } else {
+            //Query has never been made before, nothing in the cache
+            //Add the query into the cache of queries
+            connection.query("INSERT INTO queries (query, since_id) VALUES ('" + twitterQuery.toLowerCase() + "',  '0');", function(err, rows, fields) {
+                //Search twitter for this query
+                twitterSearch([]);
+            });
+        }
+    });
+
+    //Search twitter for the given query
+    function twitterSearch(tweets, since_id) {
+        //Dont do the twitter search if database only
+        if(query.databaseOnly) {
+            //Parse and send tweets to user
+            parseTweets(tweets);
+        } else {
+            var searchQuery;
+            if(since_id === undefined) {
+                //Search all tweets with this query
+                searchQuery = { q: twitterQuery, count: 100 };
+            } else {
+                //Search for tweets after a given id
+                searchQuery = { q: twitterQuery, count: 100, since_id: since_id }
+            }
+
+            //Search twitter
+            twitterClient.get('search/tweets', searchQuery, function(err, data, response) {
+                //Update the since_id in the database
+                connection.query("UPDATE queries SET since_id=? WHERE query=?;", [data.search_metadata.max_id_str, twitterQuery.toLowerCase()]);
+
+                for (var i_tweet = 0; i_tweet < data.statuses.length; i_tweet++) {
+                    tweet = data.statuses[i_tweet];
+
+                    //Push tweet into the list of tweets
+                    tweets.push(tweet);
+
+                    //Add the tweet to the cache
+                    connection.query("INSERT INTO query_tweets (query, tweet) VALUES (?, ?);", [twitterQuery.toLowerCase(), JSON.stringify(tweet)]);
+                }
+
+                //Parse and send tweets to user
+                parseTweets(tweets);
+            });
+        }
+    }
+
+    //Parse tweets - frequency, locations, and send to user
+    function parseTweets(tweets) {
+        var responseData = {};
+        responseData.tweets = tweets;
         responseData.frequency = {
             words: [],
             people: []
@@ -62,8 +139,8 @@ app.post('/performsearch', function(req, res) {
         //Extract frequency of words and people
         frequencyWordList = {};
         frequencyPeopleList = {};
-        for (var i_tweet = 0; i_tweet < data.statuses.length; i_tweet++) {
-            tweet = data.statuses[i_tweet];
+        for (var i_tweet = 0; i_tweet < tweets.length; i_tweet++) {
+            var tweet = tweets[i_tweet];
 
             //count number of tweets this user has had in the data set
             if(frequencyPeopleList[tweet.user.id_str] === undefined) {
@@ -140,7 +217,7 @@ app.post('/performsearch', function(req, res) {
         responseData.frequency.people = responseData.frequency.people.slice(0, 10);
 
         res.end(JSON.stringify(responseData));
-    });
+    }
 });
 
 app.listen(4000, function () {
