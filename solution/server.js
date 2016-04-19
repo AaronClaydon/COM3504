@@ -10,7 +10,7 @@ var twitterClient = new twit({
     access_token_secret: 'Loc3WXMGn52TKcGcEhtPX1J4JQLcBbCf5MtaaHjZQ0Co4'
 });
 var connection = mysql.createConnection({
-    host: 'azzy.network',
+    host: '178.62.113.194',
     user: 'com3504',
     password: 'password',
     database: 'com3504'
