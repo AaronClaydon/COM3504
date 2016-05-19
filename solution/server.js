@@ -40,6 +40,7 @@ app.post('/gamesearch', function(req, res) {
                         "?club a <http://www.wikidata.org/entity/Q476028>." +
                         "?club dbp:clubname '" + name + "'@en." +
                         "?club dbp:clubname ?name." +
+                        "OPTIONAL {" +
                         "?club rdfs:comment ?comment." +
                         //"?club dbo:thumbnail ?image." +
                         "?club dbp:manager ?manager." +
@@ -55,7 +56,7 @@ app.post('/gamesearch', function(req, res) {
                         "FILTER(langMatches(lang(?manager_description), 'EN')) " +
                         "FILTER(langMatches(lang(?stadium_name), 'EN'))" +
                         "FILTER(langMatches(lang(?stadium_description), 'EN'))" +
-                    "}}";
+                    "}}}";
         var client = new SparqlClient('http://dbpedia.org/sparql');
 
         client.query(query)
@@ -78,7 +79,51 @@ app.post('/gamesearch', function(req, res) {
                     image: bind_vals.stadium_image.value
                 }
             };
-            callback(team_data);
+
+            players_search(team_data.link, function(players) {
+                team_data.players = players;
+                callback(team_data);
+            });
+        });
+    }
+
+    function players_search(team, callback) {
+        var query = "PREFIX dbp: <http://dbpedia.org/property/>" +
+                    "PREFIX dbo: <http://dbpedia.org/ontology/>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "SELECT ?player (SAMPLE(?name) AS ?name) (SAMPLE(?image) AS ?image) (SAMPLE(?dob) AS ?dob) (SAMPLE(?position_name) AS ?position) (SAMPLE(?number) AS ?number) WHERE { {" +
+                        "<" + team + "> dbp:name ?player." +
+                        "?player a dbo:SoccerPlayer." +
+                            "?player foaf:name ?name." +
+                            "?player dbo:thumbnail ?image." +
+                            "?player dbo:birthDate ?dob." +
+                            "?player dbo:position ?position." +
+                            "?position rdfs:label ?position_name." +
+                            "?player dbp:clubnumber ?number." +
+                            "FILTER(langMatches(lang(?name), 'EN'))." +
+                            "FILTER(langMatches(lang(?position_name), 'EN'))." +
+                    "}} GROUP BY ?player";
+        var client = new SparqlClient('http://dbpedia.org/sparql');
+
+        client.query(query)
+        .execute(function(error, results) {
+            var bind_vals = results.results.bindings;
+            var players_data = [];
+
+            for (var i = 0; i < bind_vals.length; i++) {
+                var player_raw = bind_vals[i];
+                var player = {
+                    link: player_raw.player.value,
+                    image: player_raw.image.value,
+                    name: player_raw.name.value,
+                    dob: player_raw.dob.value,
+                    position: player_raw.position.value.replace("(association football)", "").trim(),
+                    number: player_raw.number.value
+                };
+
+                players_data.push(player);
+            }
+            callback(players_data);
         });
     }
 

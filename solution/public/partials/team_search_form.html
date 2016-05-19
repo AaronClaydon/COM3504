@@ -50,6 +50,30 @@
             </h4>
             {{ value.manager.description }}
 
+            <h3>Players</h3>
+            <table class="table">
+                <thead>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Position</th>
+                    <th>Number</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="player in value.players">
+                        <th><img ng-src="{{ player.image }}" height="100px" onerror='this.style.display = "none"' /></th>
+                        <td>{{ player.name }}</td>
+                        <td>{{ player.dob }}</td>
+                        <td>{{ player.position }}</td>
+                        <td>{{ player.number }}</td>
+                        <td>
+                            <a href="{{ player.link }}">DBPedia</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
             <h3>Stadium</h3>
             <img src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
             <h4>
