@@ -5,18 +5,54 @@ var app = angular.module('footballApp', [
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider.
-    when('/search', {
-        templateUrl: 'partials/search_form.html',
-        controller: 'SearchFormController'
+    when('/social_search', {
+        templateUrl: 'partials/social_search_form.html',
+        controller: 'SocialSearchFormController'
+    }).
+    when('/team_search', {
+        templateUrl: 'partials/team_search_form.html',
+        controller: 'TeamSearchFormController'
     }).
     otherwise({
-        redirectTo: '/search'
+        redirectTo: '/social_search'
     });
 }]);
 
 var appControllers = angular.module('footballControllers', []);
 
-appControllers.controller('SearchFormController', ['$scope', '$http', function ($scope, $http) {
+appControllers.controller('TeamSearchFormController', ['$scope', '$http', function ($scope, $http) {
+    //default test query
+    $scope.query = {
+        date: '12/05/2016',
+        team1: 'Manchester United',
+        team2: 'Arsenal'
+    };
+
+    //search results tab button press changes content
+    $('#search-tabs a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    });
+
+    //perform the search
+    $scope.search = function() {
+        //post the search query to the server
+        $http({
+            method: 'POST',
+            data: $scope.query,
+            url: '/gamesearch'
+        }).then(function successCallback(response) {
+            //update the search results with the data from the server
+            $scope.results = response.data;
+            console.log($scope.results);
+        }, function errorCallback(response) {
+            alert("Whoops, looks like there was an error performing the request");
+            console.log(response);
+        });
+    }
+}]);
+
+appControllers.controller('SocialSearchFormController', ['$scope', '$http', function ($scope, $http) {
     function loadTweetMap() {
         console.log("load tweet map");
         //Create map object

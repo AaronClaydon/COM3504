@@ -3,6 +3,7 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var twit = require('twit');
 var mysql      = require('mysql');
+var SparqlClient = require('sparql-client');
 var twitterClient = new twit({
     consumer_key: '8hoGnVhZ2ZNckjqBrgkmmLn7l',
     consumer_secret: 'H5IYUyUvTie4F2lqYwKwpwXYa272Dn5ODbxRDagdEEKlDiu92X',
@@ -10,7 +11,7 @@ var twitterClient = new twit({
     access_token_secret: 'Loc3WXMGn52TKcGcEhtPX1J4JQLcBbCf5MtaaHjZQ0Co4'
 });
 var connection = mysql.createConnection({
-    host: '178.62.113.194',
+    host: '10.0.0.21',
     user: 'com3504',
     password: 'password',
     database: 'com3504'
@@ -26,6 +27,68 @@ app.use(express.static('public'));
 
 app.get('/', function (req, res) {
     res.sendFile('queryInterface.html', { root: path.join(__dirname, '/public') });
+});
+
+app.post('/gamesearch', function(req, res) {
+    var query = req.body;
+
+    function team_search(name, callback) {
+        var query = "PREFIX dbp: <http://dbpedia.org/property/>" +
+                    "PREFIX dbo: <http://dbpedia.org/ontology/>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "SELECT * WHERE { {" +
+                        "?club a <http://www.wikidata.org/entity/Q476028>." +
+                        "?club dbp:clubname '" + name + "'@en." +
+                        "?club dbp:clubname ?name." +
+                        "?club rdfs:comment ?comment." +
+                        //"?club dbo:thumbnail ?image." +
+                        "?club dbp:manager ?manager." +
+                        "?manager rdfs:label ?manager_name." +
+                        "?manager rdfs:comment ?manager_description." +
+                        "?manager dbo:thumbnail ?manager_image." +
+                        "?club dbo:ground ?stadium." +
+                        "?stadium rdfs:label ?stadium_name." +
+                        "?stadium rdfs:comment ?stadium_description." +
+                        "?stadium dbo:thumbnail ?stadium_image." +
+                        "FILTER(langMatches(lang(?comment), 'EN'))." +
+                        "FILTER(langMatches(lang(?manager_name), 'EN'))" +
+                        "FILTER(langMatches(lang(?manager_description), 'EN')) " +
+                        "FILTER(langMatches(lang(?stadium_name), 'EN'))" +
+                        "FILTER(langMatches(lang(?stadium_description), 'EN'))" +
+                    "}}";
+        var client = new SparqlClient('http://dbpedia.org/sparql');
+
+        client.query(query)
+        .execute(function(error, results) {
+            var bind_vals = results.results.bindings[0];
+            var team_data = {
+                link: bind_vals.club.value,
+                name: bind_vals.name.value,
+                description: bind_vals.comment.value,
+                manager: {
+                    link: bind_vals.manager.value,
+                    name: bind_vals.manager_name.value,
+                    description: bind_vals.manager_description.value,
+                    image: bind_vals.manager_image.value
+                },
+                stadium: {
+                    link: bind_vals.stadium.value,
+                    name: bind_vals.stadium_name.value,
+                    description: bind_vals.stadium_description.value,
+                    image: bind_vals.stadium_image.value
+                }
+            };
+            callback(team_data);
+        });
+    }
+
+    team_search(query.team1, function(team1_results) {
+        team_search(query.team2, function(team2_results) {
+            var final_response = {team1: team1_results, team2: team2_results};
+
+            res.end(JSON.stringify(final_response));
+        });
+    });
 });
 
 app.post('/performsearch', function(req, res) {
