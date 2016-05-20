@@ -50,6 +50,22 @@ appControllers.controller('TeamSearchFormController', ['$scope', '$http', functi
             console.log(response);
         });
     }
+
+    $scope.playermore = function(id) {
+        $http({
+            method: 'POST',
+            data: {player: id},
+            url: '/playersearch'
+        }).then(function successCallback(response) {
+            //update the search results with the data from the server
+            $scope.player_results = response.data;
+            $('#player_details_modal').modal('show');
+            console.log($scope.player_results);
+        }, function errorCallback(response) {
+            alert("Whoops, looks like there was an error performing the request");
+            console.log(response);
+        });
+    }
 }]);
 
 appControllers.controller('SocialSearchFormController', ['$scope', '$http', function ($scope, $http) {

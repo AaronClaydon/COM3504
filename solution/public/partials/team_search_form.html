@@ -68,6 +68,7 @@
                         <td>{{ player.position }}</td>
                         <td>{{ player.number }}</td>
                         <td>
+                            <a href="" ng-click="playermore(player.link)">Read More</a><br/>
                             <a href="{{ player.link }}">DBPedia</a>
                         </td>
                     </tr>
@@ -75,12 +76,75 @@
             </table>
 
             <h3>Stadium</h3>
-            <img src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
+            <img ng-src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
             <h4>
                 {{ value.stadium.name }}
                 <small><a href="{{ value.stadium.link }}">DBPedia</a></small>
             </h4>
             {{ value.stadium.description }}
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="player_details_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">{{ player_results.name }}</h4>
+            </div>
+            <div class="modal-body">
+                <h4>Profile</h4>
+                <div class="row">
+                    <div class="col-md-3">
+                        <img ng-src="{{ player_results.image }}" height="100px" onerror='this.style.display = "none"' />
+                    </div>
+                    <div class="col-md-9">
+                        <p>
+                            <table>
+                                <tr>
+                                    <th>Name</th>
+                                    <td>{{ player_results.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date of Birth</th>
+                                    <td>{{ player_results.dob }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Position</th>
+                                    <td>{{ player_results.position }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Number</th>
+                                    <td>{{ player_results.number }}</td>
+                                </tr>
+                            </table>
+                        </p>
+                    </div>
+                </div>
+
+                <p>
+                    {{ player_results.abstract }}
+                </p>
+
+                <h4>Career</h4>
+                <p ng-repeat="career in player_results.career">
+                    <strong>
+                        <i ng-if="!career.team_name">Unknown team</i>
+                        {{career.team_name}}<br/>
+                    </strong>
+                    <span ng-if="career.years">
+                        Year: {{ career.years }}<br/>
+                    </span>
+                    <span ng-if="career.matches">
+                        Number of matches: {{ career.matches }}<br/>
+                    </span>
+                    <span ng-if="career.goals">
+                        Number of goals: {{ career.goals }}<br/>
+                    </span>
+                </p>
+            </div>
         </div>
     </div>
 </div>
