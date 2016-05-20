@@ -17,6 +17,7 @@ var connection = mysql.createConnection({
 });
 connection.connect();
 
+//POST /socialsearch
 router.post('/', function(req, res) {
     var query = req.body;
 

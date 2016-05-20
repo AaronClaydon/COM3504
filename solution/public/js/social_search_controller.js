@@ -1,6 +1,5 @@
 appControllers.controller('SocialSearchFormController', ['$scope', '$http', function ($scope, $http) {
     function loadTweetMap() {
-        console.log("load tweet map");
         //Create map object
         var map = new google.maps.Map(document.getElementById('tweet-map'), {
             center: {lat: 53.3810469, lng: -1.4800108},
@@ -91,7 +90,6 @@ appControllers.controller('SocialSearchFormController', ['$scope', '$http', func
         }).then(function successCallback(response) {
             //update the search results with the data from the server
             $scope.results = response.data;
-            console.log($scope.results);
         }, function errorCallback(response) {
             alert("Whoops, looks like there was an error performing the request");
             console.log(response);
