@@ -35,6 +35,10 @@ function team_search(name, callback) {
     //Execute SPARQL query
     client.query(query)
     .execute(function(error, results) {
+        if (error) {
+            res.status(500).send({ error: 'Team search failed!' }).end();
+            return;
+        };
         //Get first returned result
         var bind_vals = results.results.bindings[0];
 
@@ -91,6 +95,11 @@ function players_search(team, callback) {
     //Execute the query
     client.query(query)
     .execute(function(error, results) {
+        if (error) {
+            res.status(500).send({ error: 'Team players search failed!' }).end();
+            return;
+        };
+
         var bind_vals = results.results.bindings;
         var players_data = [];
 
@@ -140,6 +149,11 @@ function player_data(name, callback) {
     client.query(query)
     .bind('player', '<' + name + '>') //bind the player URI to the ?player variable
     .execute(function(error, results) {
+        if (error) {
+            res.status(500).send({ error: 'Player details search failed!' }).end();
+            return;
+        };
+
         //get the one and only result
         var player_raw = results.results.bindings[0];
 
@@ -178,6 +192,10 @@ function career_history(name, callback) {
     client.query(query)
     .bind('player', '<' + name + '>') //bind the player URI to the ?player variable
     .execute(function(error, results) {
+        if (error) {
+            res.status(500).send({ error: 'Player career history search failed!' }).end();
+            return;
+        };
         var bind_vals = results.results.bindings;
         var career_data = [];
 

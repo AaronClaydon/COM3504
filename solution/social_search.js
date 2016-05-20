@@ -51,7 +51,10 @@ router.post('/', function(req, res) {
 
     //Check if this query is in the cache
     connection.query('SELECT query, since_id FROM queries WHERE query=?', [twitterQuery.toLowerCase()], function(err, rows, fields) {
-        if (err) throw err;
+        if (err) {
+            res.status(500).send({ error: 'Cache Search failed!' }).end();
+            return;
+        };
 
         if(rows.length === 1) {
             //Existing query results
@@ -98,6 +101,10 @@ router.post('/', function(req, res) {
 
             //Search twitter
             twitterClient.get('search/tweets', searchQuery, function(err, data, response) {
+                if (err) {
+                    res.status(500).send({ error: 'Twitter Search Failed!' }).end();
+                    return;
+                }
                 //Update the since_id in the database
                 connection.query("UPDATE queries SET since_id=? WHERE query=?;", [data.search_metadata.max_id_str, twitterQuery.toLowerCase()]);
 
