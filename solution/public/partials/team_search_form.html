@@ -27,66 +27,81 @@
 <div class="search-results" ng-class="{show: results}" xmlns:dbp="http://dbpedia.org/property/" xmlns:dbo="http://dbpedia.org/ontology/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" >
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist" id="search-tabs">
-        <li role="presentation" class="active"><a href="#team1" aria-controls="team1" role="tab" data-toggle="tab">{{ results.team1.name }}</a></li>
-        <li role="presentation"><a href="#team2" aria-controls="team2" role="tab" data-toggle="tab">{{ results.team2.name }}</a></li>
+        <li role="presentation" class="active">
+            <a href="#team1" aria-controls="team1" role="tab" data-toggle="tab">
+                <i ng-if="!results.team1">{{ query.team1 }}</i>
+                {{ results.team1.name }}
+            </a>
+        </li>
+        <li role="presentation">
+            <a href="#team2" aria-controls="team2" role="tab" data-toggle="tab">
+                <i ng-if="!results.team2">{{ query.team2 }}</i>
+                {{ results.team2.name }}
+            </a>
+        </li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane" ng-class="{active: key=='team1'}" id="{{ key }}" ng-repeat="(key, value) in results" about="{{ results.link }}">
-            <h2>
-                <span property="dbp:clubname">{{ value.name }}</span>
-                <small><a href="{{ value.link }}">DBPedia</a></small>
-            </h2>
-            <p property="rdfs:comment">
-                {{ value.description }}
-            </p>
+            <div ng-if="!value">
+                <h2>Team not found</h2>
+            </div>
+            <div ng-if="value">
+                <h2>
+                    <span property="dbp:clubname">{{ value.name }}</span>
+                    <small><a href="{{ value.link }}">DBPedia</a></small>
+                </h2>
+                <p property="rdfs:comment">
+                    {{ value.description }}
+                </p>
 
-            <h3>Manager</h3>
-            <img src="{{ value.manager.image }}" class="pull-left" height="100px"/>
-            <h4>
-                <span property="rdfs:manager">{{ value.manager.name }}</span>
-                <small><a href="{{ value.manager.link }}">DBPedia</a></small>
-            </h4>
+                <h3>Manager</h3>
+                <img ng-src="{{ value.manager.image }}" class="pull-left" height="100px"/>
+                <h4>
+                    <span property="rdfs:manager">{{ value.manager.name }}</span>
+                    <small><a href="{{ value.manager.link }}">DBPedia</a></small>
+                </h4>
 
-            <p about="{{ value.manager.link }}" property="rdfs:comment">
-                {{ value.manager.description }}
-            </p>
+                <p about="{{ value.manager.link }}" property="rdfs:comment">
+                    {{ value.manager.description }}
+                </p>
 
-            <br/>
+                <br/>
 
-            <h3>Players</h3>
-            <table class="table">
-                <thead>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Date of Birth</th>
-                    <th>Position</th>
-                    <th>Number</th>
-                    <th></th>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="player in value.players" about="{{ player.link }}">
-                        <th><img ng-src="{{ player.image }}" height="100px" onerror='this.style.display = "none"' /></th>
-                        <td property="foaf:name">{{ player.name }}</td>
-                        <td property="dbo:birthDate">{{ player.dob }}</td>
-                        <td property="dbo:position">{{ player.position }}</td>
-                        <td property="dbp:clubnumber">{{ player.number }}</td>
-                        <td>
-                            <a href="" ng-click="playermore(player.link)">Read More</a><br/>
-                            <a href="{{ player.link }}">DBPedia</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                <h3>Players</h3>
+                <table class="table">
+                    <thead>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Date of Birth</th>
+                        <th>Position</th>
+                        <th>Number</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="player in value.players" about="{{ player.link }}">
+                            <th><img ng-src="{{ player.image }}" height="100px" onerror='this.style.display = "none"' /></th>
+                            <td property="foaf:name">{{ player.name }}</td>
+                            <td property="dbo:birthDate">{{ player.dob }}</td>
+                            <td property="dbo:position">{{ player.position }}</td>
+                            <td property="dbp:clubnumber">{{ player.number }}</td>
+                            <td>
+                                <a href="" ng-click="playermore(player.link)">Read More</a><br/>
+                                <a href="{{ player.link }}">DBPedia</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <h3>Stadium</h3>
-            <img ng-src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
-            <h4>
-                <span property="dbo:ground">{{ value.stadium.name }}</span>
-                <small><a href="{{ value.stadium.link }}">DBPedia</a></small>
-            </h4>
-            {{ value.stadium.description }}
+                <h3>Stadium</h3>
+                <img ng-src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
+                <h4>
+                    <span property="dbo:ground">{{ value.stadium.name }}</span>
+                    <small><a href="{{ value.stadium.link }}">DBPedia</a></small>
+                </h4>
+                {{ value.stadium.description }}
+            </div>
         </div>
     </div>
 </div>

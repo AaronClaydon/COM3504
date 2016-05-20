@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var SparqlClient = require('sparql-client');
-var sparql_endpoint = 'http://dbpedia.org/sparql';
+var sparqlClient = require('sparql-client');
+var sparqlEndpoint = 'http://dbpedia.org/sparql';
 
 //Search for details of a given team name
 function team_search(name, callback) {
@@ -30,7 +30,7 @@ function team_search(name, callback) {
                     "FILTER(langMatches(lang(?stadium_name), 'EN'))" +
                     "FILTER(langMatches(lang(?stadium_description), 'EN'))" +
                 "}}}";
-    var client = new SparqlClient(sparql_endpoint);
+    var client = new sparqlClient(sparqlEndpoint);
 
     //Execute SPARQL query
     client.query(query)
@@ -41,6 +41,12 @@ function team_search(name, callback) {
         };
         //Get first returned result
         var bind_vals = results.results.bindings[0];
+
+        //Stop the search if the team couldnt be found by its name
+        if(bind_vals === undefined) {
+            callback(false);
+            return;
+        }
 
         //Extract returned data and format it nicely
         var team_data = {
@@ -90,7 +96,7 @@ function players_search(team, callback) {
                         "FILTER(langMatches(lang(?name), 'EN'))." +
                         "FILTER(langMatches(lang(?position_name), 'EN'))." +
                 "}} GROUP BY ?player";
-    var client = new SparqlClient(sparql_endpoint);
+    var client = new sparqlClient(sparqlEndpoint);
 
     //Execute the query
     client.query(query)
@@ -143,7 +149,7 @@ function player_data(name, callback) {
                     "FILTER(langMatches(lang(?name), 'EN'))." +
                     "FILTER(langMatches(lang(?position_name), 'EN'))." +
                 "}} LIMIT 1";
-    var client = new SparqlClient(sparql_endpoint);
+    var client = new sparqlClient(sparqlEndpoint);
 
     //Execute the query
     client.query(query)
@@ -186,7 +192,7 @@ function career_history(name, callback) {
                     "OPTIONAL { ?career dbo:numberOfGoals ?goals.}." +
                     "OPTIONAL { ?career dbo:years ?years.}." +
                 "}} ORDER BY DESC(?years)";
-    var client = new SparqlClient(sparql_endpoint);
+    var client = new sparqlClient(sparqlEndpoint);
 
     //Execute the query
     client.query(query)

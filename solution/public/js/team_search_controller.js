@@ -1,7 +1,7 @@
 appControllers.controller('TeamSearchFormController', ['$scope', '$http', function ($scope, $http) {
     //default test query
     $scope.query = {
-        date: '12/05/2016',
+        date: new Date(Date.now()),
         team1: 'Manchester United',
         team2: 'Arsenal'
     };
