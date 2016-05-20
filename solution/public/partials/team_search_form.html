@@ -48,7 +48,12 @@
                 <span property="rdfs:manager">{{ value.manager.name }}</span>
                 <small><a href="{{ value.manager.link }}">DBPedia</a></small>
             </h4>
-            {{ value.manager.description }}
+
+            <p about="{{ value.manager.link }}" property="rdfs:comment">
+                {{ value.manager.description }}
+            </p>
+
+            <br/>
 
             <h3>Players</h3>
             <table class="table">
