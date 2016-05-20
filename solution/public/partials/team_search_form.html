@@ -24,7 +24,7 @@
     </div>
 </form>
 
-<div class="search-results" ng-class="{show: results}">
+<div class="search-results" ng-class="{show: results}" xmlns:dbp="http://dbpedia.org/property/" xmlns:dbo="http://dbpedia.org/ontology/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:foaf="http://xmlns.com/foaf/0.1/" >
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist" id="search-tabs">
         <li role="presentation" class="active"><a href="#team1" aria-controls="team1" role="tab" data-toggle="tab">{{ results.team1.name }}</a></li>
@@ -33,19 +33,19 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane" ng-class="{active: key=='team1'}" id="{{ key }}" ng-repeat="(key, value) in results">
+        <div role="tabpanel" class="tab-pane" ng-class="{active: key=='team1'}" id="{{ key }}" ng-repeat="(key, value) in results" about="{{ results.link }}">
             <h2>
-                {{ value.name }}
+                <span property="dbp:clubname">{{ value.name }}</span>
                 <small><a href="{{ value.link }}">DBPedia</a></small>
             </h2>
-            <p>
+            <p property="rdfs:comment">
                 {{ value.description }}
             </p>
 
             <h3>Manager</h3>
             <img src="{{ value.manager.image }}" class="pull-left" height="100px"/>
             <h4>
-                {{ value.manager.name }}
+                <span property="rdfs:manager">{{ value.manager.name }}</span>
                 <small><a href="{{ value.manager.link }}">DBPedia</a></small>
             </h4>
             {{ value.manager.description }}
@@ -61,12 +61,12 @@
                     <th></th>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="player in value.players">
+                    <tr ng-repeat="player in value.players" about="{{ player.link }}">
                         <th><img ng-src="{{ player.image }}" height="100px" onerror='this.style.display = "none"' /></th>
-                        <td>{{ player.name }}</td>
-                        <td>{{ player.dob }}</td>
-                        <td>{{ player.position }}</td>
-                        <td>{{ player.number }}</td>
+                        <td property="foaf:name">{{ player.name }}</td>
+                        <td property="dbo:birthDate">{{ player.dob }}</td>
+                        <td property="dbo:position">{{ player.position }}</td>
+                        <td property="dbp:clubnumber">{{ player.number }}</td>
                         <td>
                             <a href="" ng-click="playermore(player.link)">Read More</a><br/>
                             <a href="{{ player.link }}">DBPedia</a>
@@ -78,7 +78,7 @@
             <h3>Stadium</h3>
             <img ng-src="{{ value.stadium.image }}" class="pull-left" height="100px"/>
             <h4>
-                {{ value.stadium.name }}
+                <span property="dbo:ground">{{ value.stadium.name }}</span>
                 <small><a href="{{ value.stadium.link }}">DBPedia</a></small>
             </h4>
             {{ value.stadium.description }}
@@ -89,7 +89,7 @@
 
 <div class="modal fade" tabindex="-1" role="dialog" id="player_details_modal">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" about="{{ player_results.link }}">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">{{ player_results.name }}</h4>
@@ -105,43 +105,45 @@
                             <table>
                                 <tr>
                                     <th>Name</th>
-                                    <td>{{ player_results.name }}</td>
+                                    <td property="foaf:name">{{ player_results.name }}</td>
                                 </tr>
                                 <tr>
                                     <th>Date of Birth</th>
-                                    <td>{{ player_results.dob }}</td>
+                                    <td property="dbo:birthDate">{{ player_results.dob }}</td>
                                 </tr>
                                 <tr>
                                     <th>Position</th>
-                                    <td>{{ player_results.position }}</td>
+                                    <td property="dbo:position">{{ player_results.position }}</td>
                                 </tr>
                                 <tr>
                                     <th>Number</th>
-                                    <td>{{ player_results.number }}</td>
+                                    <td property="dbp:clubnumber">{{ player_results.number }}</td>
                                 </tr>
                             </table>
                         </p>
                     </div>
                 </div>
 
-                <p>
+                <p property="dbo:abstract">
                     {{ player_results.abstract }}
                 </p>
 
                 <h4>Career</h4>
-                <p ng-repeat="career in player_results.career">
+                <p ng-repeat="career in player_results.career" about="{{ career.link }}">
                     <strong>
                         <i ng-if="!career.team_name">Unknown team</i>
-                        {{career.team_name}}<br/>
+                        <span property="dbo:team">{{career.team_name}}</span>
+                        <small ng-if="career.team"><a href="{{ career.team }}">DBPedia</a></small>
+                        <br/>
                     </strong>
                     <span ng-if="career.years">
-                        Year: {{ career.years }}<br/>
+                        Year: <span property="dbo:years">{{ career.years }}</span><br/>
                     </span>
                     <span ng-if="career.matches">
-                        Number of matches: {{ career.matches }}<br/>
+                        Number of matches: <span property="dbo:numberOfGoals">{{ career.matches }}</span><br/>
                     </span>
                     <span ng-if="career.goals">
-                        Number of goals: {{ career.goals }}<br/>
+                        Number of goals: <span property="dbo:numberOfGoals">{{ career.goals }}</span><br/>
                     </span>
                 </p>
             </div>
